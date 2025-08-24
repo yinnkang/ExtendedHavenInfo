@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(msbuild:*)",
+      "Bash(dotnet build)",
+      "Bash(cp:*)"
+    ],
+    "defaultMode": "acceptEdits"
+  }
+}

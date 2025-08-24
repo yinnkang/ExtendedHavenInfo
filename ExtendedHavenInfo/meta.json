@@ -1,0 +1,24 @@
+{
+  "ID": "com.quinn11235.ExtendedHavenInfo",
+  "AssemblyName": "ExtendedHavenInfo.dll",
+  "Author": [
+    {
+      "Key": "English",
+      "Value": "Quinn11235"
+    }
+  ],
+  "Version": "1.0",
+  "Name": [
+    {
+      "Key": "English",
+      "Value": "Extended Haven Info"
+    }
+  ],
+  "Description": [
+    {
+      "Key": "English",
+      "Value": "Show additional information for havens."
+    }
+  ],
+  "Dependencies": []
+}
