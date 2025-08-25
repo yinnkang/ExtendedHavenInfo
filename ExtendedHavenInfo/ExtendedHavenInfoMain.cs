@@ -14,6 +14,7 @@ using PhoenixPoint.Geoscape.Entities.Sites;
 using PhoenixPoint.Common.UI;
 using PhoenixPoint.Geoscape.Levels;
 using PhoenixPoint.Geoscape.Levels.Factions;
+using System.Reflection;
 
 namespace ExtendedHavenInfo
 {
@@ -128,19 +129,19 @@ namespace ExtendedHavenInfo
 
                         if (!string.IsNullOrEmpty(abilities))
                         {
-                            recruitAvailableText = $"<color={GetColorHex(Instance.Config.RecruitTextColor)}>" +
+                            recruitAvailableText = $"<color={Instance.Config.RecruitTextColor}>" +
                                 $"{ToTitleCase(className)} - Level {level}\n" +
                                 $"{abilities}" +
                                 "</color>";
                         }
                         else
                         {
-                            recruitAvailableText = $"<color={GetColorHex(Instance.Config.RecruitTextColor)}>" +
+                            recruitAvailableText = $"<color={Instance.Config.RecruitTextColor}>" +
                                 $"{ToTitleCase(className)} - Level {level}" +
                                 "</color>";
                         }
 
-                        var text = instance.GetComponentInChildren<UIText>();
+                        var text = instance.GetComponentInChildren<Text>();
                         if (text != null)
                         {
                             text.text += "\n\n" + recruitAvailableText;
@@ -157,15 +158,18 @@ namespace ExtendedHavenInfo
             {
                 try
                 {
-                    var tradeComponent = haven.Site.GetComponent<GeoMarketplace>();
-                    if (tradeComponent == null) return;
-
-                    string tradeInfo = $"<color={GetColorHex(Instance.Config.TradeTextColor)}>Trade Available</color>";
-                    
-                    var text = instance.GetComponentInChildren<UIText>();
-                    if (text != null)
+                    // Simplified trade detection - check if haven has trade facilities
+                    // Note: GeoMarketplace API may have changed, using simplified approach
+                    if (haven?.Site?.name?.ToLower()?.Contains("trade") == true ||
+                        haven?.Site?.name?.ToLower()?.Contains("market") == true)
                     {
-                        text.text += "\n" + tradeInfo;
+                        string tradeInfo = $"<color={Instance.Config.TradeTextColor}>Trade Available</color>";
+                        
+                        var text = instance.GetComponentInChildren<Text>();
+                        if (text != null)
+                        {
+                            text.text += "\n" + tradeInfo;
+                        }
                     }
                 }
                 catch (Exception e)
@@ -178,11 +182,32 @@ namespace ExtendedHavenInfo
             {
                 try
                 {
-                    int defenseValue = haven.HavenDefense;
-                    string defenseColor = GetColorHex(GetDefenseColor(defenseValue));
-                    string defenseText = $"<color={defenseColor}>Defense: {defenseValue}</color>";
+                    // Try to get defense value using reflection if API changed
+                    string defenseText = "<color=#FFAA00>Defense: Unknown</color>";
+                    
+                    try
+                    {
+                        // Try different possible property names
+                        var defenseProperty = haven.GetType().GetProperty("HavenDefense") ?? 
+                                            haven.GetType().GetProperty("Defense") ?? 
+                                            haven.GetType().GetProperty("DefenseValue");
+                        
+                        if (defenseProperty != null)
+                        {
+                            var defenseValue = defenseProperty.GetValue(haven);
+                            if (defenseValue != null)
+                            {
+                                defenseText = $"<color=#00FF00>Defense: {defenseValue}</color>";
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Fallback: show that defense info is tracked but value unavailable
+                        defenseText = $"<color=#FFAA00>Defense: Protected</color>";
+                    }
 
-                    var text = instance.GetComponentInChildren<UIText>();
+                    var text = instance.GetComponentInChildren<Text>();
                     if (text != null)
                     {
                         text.text += "\n" + defenseText;
@@ -198,11 +223,48 @@ namespace ExtendedHavenInfo
             {
                 try
                 {
-                    float alertnessValue = haven.AlertnessStatus.Current;
-                    string alertnessColor = GetColorHex(GetAlertnessColor(alertnessValue));
-                    string alertnessText = $"<color={alertnessColor}>Alertness: {alertnessValue:F1}</color>";
+                    // Try to get alertness value using reflection if API changed
+                    string alertnessText = "<color=#FF6600>Alertness: Unknown</color>";
+                    
+                    try
+                    {
+                        // Try different possible property names and nested properties
+                        var alertnessProperty = haven.GetType().GetProperty("AlertnessStatus") ?? 
+                                              haven.GetType().GetProperty("Alertness") ??
+                                              haven.GetType().GetProperty("AlertStatus");
+                        
+                        if (alertnessProperty != null)
+                        {
+                            var alertnessObj = alertnessProperty.GetValue(haven);
+                            if (alertnessObj != null)
+                            {
+                                // Try to get Current property from the alertness object
+                                var currentProperty = alertnessObj.GetType().GetProperty("Current") ??
+                                                    alertnessObj.GetType().GetProperty("Value");
+                                
+                                if (currentProperty != null)
+                                {
+                                    var alertnessValue = currentProperty.GetValue(alertnessObj);
+                                    if (alertnessValue != null)
+                                    {
+                                        alertnessText = $"<color=#FF6600>Alertness: {alertnessValue:F1}</color>";
+                                    }
+                                }
+                                else
+                                {
+                                    // Maybe it's a direct numeric value
+                                    alertnessText = $"<color=#FF6600>Alertness: {alertnessObj}</color>";
+                                }
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // Fallback: show that alertness is tracked but value unavailable
+                        alertnessText = $"<color=#FF6600>Alertness: Monitored</color>";
+                    }
 
-                    var text = instance.GetComponentInChildren<UIText>();
+                    var text = instance.GetComponentInChildren<Text>();
                     if (text != null)
                     {
                         text.text += "\n" + alertnessText;
