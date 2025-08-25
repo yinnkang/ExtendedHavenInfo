@@ -4,10 +4,10 @@
   "Author": [
     {
       "Key": "English",
-      "Value": "Quinn11235"
+      "Value": "PP Modding Community"
     }
   ],
-  "Version": "1.0",
+  "Version": "2.0",
   "Name": [
     {
       "Key": "English",
@@ -17,7 +17,7 @@
   "Description": [
     {
       "Key": "English",
-      "Value": "Show additional information for havens."
+      "Value": "Enhanced haven tooltip information system with comprehensive recruit, trade, defense, and alertness data. Features color-coded text display, configurable information categories, and real-time updates for strategic decision-making. Displays personnel availability, marketplace data, security status, and faction relations with customizable visibility options and visual enhancements."
     }
   ],
   "Dependencies": []
